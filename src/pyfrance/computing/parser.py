@@ -18,4 +18,3 @@ class Parser:
                     continue
                 c = City(row[0], row[1], row[2], row[3], row[4])
                 self.cities.add(c)
-                print(c)
