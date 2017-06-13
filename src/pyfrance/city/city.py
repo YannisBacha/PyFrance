@@ -19,8 +19,8 @@ class City:
         self.coordinates = Coordinates(latitude, longitude)
         self.neighbors = set()
 
-    def add_neighbor(self, city):
-        self.neighbors.add(city)
+    def add_neighbor(self, city, dist):
+        self.neighbors.add((city, dist))
 
     def __str__(self):
         return "{0} {1} {2} {3}".format(self.id, self.name, self.population, self.coordinates)
