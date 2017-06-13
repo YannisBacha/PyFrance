@@ -13,7 +13,7 @@ class Parser:
         :param min_pop: the minimum population to compute the city
         """
         self.filename = filename
-        self.cities = set()
+        self.cities = {}
         self.min_pop = min_pop
 
     def parse(self):
@@ -25,5 +25,5 @@ class Parser:
                     continue
                 c = City(row[0], row[1], int(row[2]), float(row[4].replace(',', '.')), float(row[3].replace(',', '.')))
                 if self.min_pop is None or self.min_pop < c.population:
-                    self.cities.add(c)
+                    self.cities[c.id] = c
         print("{0} cities created".format(len(self.cities)))

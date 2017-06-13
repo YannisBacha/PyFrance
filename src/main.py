@@ -15,5 +15,5 @@ t1 = time.time()
 b.build()
 t2 = time.time()
 print("{0}s".format((t2 - t1)))
-c = random.sample(p.cities, 1)[0]
+c = p.cities[random.sample(list(p.cities), 1)[0]]
 print(c.name, len(c.neighbors), "neighbors", c.neighbors)

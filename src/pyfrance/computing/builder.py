@@ -16,8 +16,10 @@ class Builder:
     def build(self):
         """Build the graph by filling cities' neighbors"""
         links = 0
-        for city in self.cities:
-            for other in self.cities:
+        for key1 in self.cities:
+            city = self.cities[key1]
+            for key2 in self.cities:
+                other = self.cities[key2]
                 if city != other:
                     dist = Builder.haversine(city.coordinates.latitude,
                                              city.coordinates.longitude,
