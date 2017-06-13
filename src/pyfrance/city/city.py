@@ -17,9 +17,8 @@ class City:
         self.longitude = longitude
         self.latitude = latitude
 
-
     def __str__(self):
-        return "{0} {1} {2}".format(self.id, self.name, self.population)
+        return "{0} {1} {2} {3} {4}".format(self.id, self.name, self.population, self.longitude, self.latitude)
 
     def __repr__(self):
         return str(self)

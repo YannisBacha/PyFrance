@@ -1,16 +1,6 @@
 #! /usr/bin/python3.6
-# -*- coding: utf-8 -*-
-import csv
-from city.city import City
+from pyfrance.computing import Parser
 
-cr = csv.reader(open("Test.csv","r"))
 
-with open('Test.csv', 'r') as file:
-    reader = csv.reader(file, delimiter=';')
-    for row in reader:
-        if(row[1] == 'nom'):
-            print("Id   Nom    Population")
-            continue
-        c = City(row[0], row[1], row[2], row[3], row[4])
-        print(c)
-
+p = Parser('../resources/CommunesFrance.csv')
+p.parse()
