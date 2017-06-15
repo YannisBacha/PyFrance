@@ -14,19 +14,20 @@ class Builder:
         self.max_dist = max_dist
 
     def build(self):
-        """Build the graph by filling cities' neighbors"""
+        """Build the graph by filling cities' neighbours"""
         links = 0
         for key1 in self.cities:
             city = self.cities[key1]
             for key2 in self.cities:
                 other = self.cities[key2]
-                if city != other:
+                if city != other and other not in city.neighbours:
                     dist = Builder.haversine(city.coordinates.latitude,
                                              city.coordinates.longitude,
                                              other.coordinates.latitude,
                                              other.coordinates.longitude)
                     if self.max_dist is None or self.max_dist > dist:
-                        city.add_neighbor(other, dist)
+                        city.add_neighbour(other, dist)
+                        other.add_neighbour(city, dist)
                         links += 1
         print("{0} links created".format(links))
 

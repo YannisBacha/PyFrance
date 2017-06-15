@@ -17,10 +17,10 @@ class City:
         self.name = name
         self.population = population
         self.coordinates = Coordinates(latitude, longitude)
-        self.neighbors = set()
+        self.neighbours = set()
 
-    def add_neighbor(self, city, dist):
-        self.neighbors.add((city, dist))
+    def add_neighbour(self, city, dist):
+        self.neighbours.add((city, dist))
 
     def __str__(self):
         return "{0} {1} {2} {3}".format(self.id, self.name, self.population, self.coordinates)

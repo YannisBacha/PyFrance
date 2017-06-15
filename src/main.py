@@ -3,7 +3,7 @@ import random
 import time
 
 from pyfrance.computing import *
-
+from pyfrance.pathfinding.dijkstra import Dijkstra
 
 p = Parser('../resources/CommunesFrance.csv', 10000)
 t1 = time.time()
@@ -16,4 +16,7 @@ b.build()
 t2 = time.time()
 print("{0}s".format((t2 - t1)))
 c = p.cities[random.sample(list(p.cities), 1)[0]]
-print(c.name, len(c.neighbors), "neighbors", c.neighbors)
+
+dijkstra = Dijkstra(p.cities)
+path = dijkstra.compute_path('paris', 'lyon')
+print(path)
