@@ -1,7 +1,12 @@
 class Coordinates:
-    """Represent gps coordinates"""
-
+    """Représente des coordonnées GPS."""
     def __init__(self, latitude, longitude):
+        """
+        Crée un jeu de coordonnées.
+
+        :param latitude: la latitude
+        :param longitude: la longitude
+        """
         self.latitude = latitude
         self.longitude = longitude
 

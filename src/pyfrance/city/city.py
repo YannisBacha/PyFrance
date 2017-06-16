@@ -2,16 +2,17 @@ from .coordinates import Coordinates
 
 
 class City:
-    """Represent a city."""
+    """Représente une ville."""
 
     def __init__(self, id, name, population, latitude, longitude):
-        """Build a new city
+        """
+        Crée une ville.
 
-        :param id: the id of the city
-        :param name: the name of the city
-        :param population: the number of people who live in the city
-        :param longitude: the longitude of the city
-        :param latitude: the longitude of the city
+        :param id: l'id de la ville
+        :param name: le nom de la ville
+        :param population: le nombre d'habitants dans la ville
+        :param latitude: la latitude de la ville
+        :param longitude: la longitude de la ville
         """
         self.id = id
         self.name = name
@@ -20,6 +21,14 @@ class City:
         self.neighbours = set()
 
     def add_neighbour(self, city, dist):
+        """
+        Ajoute un voisin à la ville.
+        Les voisins sont stockés dans un tuple:
+            (ville, distance)
+
+        :param city: la ville
+        :param dist: la distance
+        """
         self.neighbours.add((city, dist))
 
     def __str__(self):

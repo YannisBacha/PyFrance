@@ -5,18 +5,27 @@ import time
 from pyfrance.computing import *
 from pyfrance.pathfinding.dijkstra import Dijkstra
 
-p = Parser('../resources/CommunesFrance.csv', 2000)
+p = Parser('../resources/CommunesFrance.csv', 10000)
 t1 = time.time()
-p.parse()
+print("{0} cities created".format(p.parse()))
 t2 = time.time()
 print("{0}ms".format((t2 - t1) * 1000))
+
 b = Builder(p.cities, 50)
 t1 = time.time()
-b.build()
+print("{0} links created".format(b.build()))
 t2 = time.time()
 print("{0}s".format((t2 - t1)))
 c = p.cities[random.sample(list(p.cities), 1)[0]]
 
 dijkstra = Dijkstra(p.cities)
-path = dijkstra.compute_path('paris', 'lyon')
+t1 = time.time()
+path = dijkstra.compute_path('calais', 'marseille')
+t2 = time.time()
+print("{0}ms".format((t2 - t1) * 1000))
+print(path)
+t1 = time.time()
+path = dijkstra.compute_path_priority_queue('calais', 'marseille')
+t2 = time.time()
+print("{0}ms".format((t2 - t1) * 1000))
 print(path)
