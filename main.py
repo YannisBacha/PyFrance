@@ -11,7 +11,7 @@ def js_path(cities, path):
         city = cities[city_id]
         print('{lat: ', city.coordinates.latitude, ', lng: ', city.coordinates.longitude, '},', sep='')
 
-p = Parser('../resources/CommunesFrance.csv', 10000)
+p = Parser('resources/CommunesFrance.csv', 10000)
 t1 = time.time()
 print("{0} cities created".format(p.parse()))
 t2 = time.time()
