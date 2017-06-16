@@ -43,4 +43,3 @@ class Builder:
         c = 2 * asin(sqrt(a))
         r = 6371
         return c * r
-

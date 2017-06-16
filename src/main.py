@@ -5,7 +5,7 @@ import time
 from pyfrance.computing import *
 from pyfrance.pathfinding.dijkstra import Dijkstra
 
-p = Parser('../resources/CommunesFrance.csv', 10000)
+p = Parser('../resources/CommunesFrance.csv', 2000)
 t1 = time.time()
 p.parse()
 t2 = time.time()
