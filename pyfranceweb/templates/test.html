@@ -3,21 +3,21 @@
 <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <title>Simple Polylines</title>
+    <title>PyFrance</title>
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/materialize.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/colorpicker.min.css') }}">
     <style>
-        /* Always set the map height explicitly to define the size of the div
-         * element that contains the map. */
         #map {
             height: 500px;
             width: 500px;
         }
-
-        /* Optional: Makes the sample page fill the window. */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
+        .color-block {
+            float: left;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border: 1px solid rgba(0, 0, 0, .2);
         }
     </style>
 </head>
@@ -27,24 +27,47 @@
         <div class="container">
             <h1>Bienvenue dans PyFrance !</h1>
             <div class="row">
-                <div id="map" class="col"></div>
                 <div class="col s6">
+                    <div id="map"></div>
+                    <h4>Résultats <button class="btn" onclick="clear_map()">Effacer</button></h4>
+                    <div id="results"></div>
+                </div>
+                <div class="col s6">
+                    <h4>Construction du graphe</h4>
                     <div class="input-field">
-                        <select>
-                            {% for city in cities %}
-                            <option value="{{ city.id }}">{{ city.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <label>Ville de départ</label>
+                        <input id="pop" type="text">
+                        <label for="pop">Population minimale des villes</label>
                     </div>
                     <div class="input-field">
-                        <select>
-                            {% for city in cities %}
-                            <option value="{{ city.id }}">{{ city.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <label>Ville d'arrivée</label>
+                        <input id="dist" type="text">
+                        <label for="dist">Distance maximale entre deux villes</label>
                     </div>
+                    <button id="parse-btn" class="btn btn-large blue" onclick="parse()">Construire</button>
+                </div>
+                <div class="col s6">
+                    <h4>Calcul d'itinéraire</h4>
+                    <div class="input-field">
+                        <select id="algo">
+                            <option value="dijkstra">Dijkstra</option>
+                            <option value="astar">A*</option>
+                        </select>
+                        <label for="algo">Algorithme</label>
+                    </div>
+                    <div class="input-field">
+                        <select id="c1">
+                        </select>
+                        <label for="c1">Ville de départ</label>
+                    </div>
+                    <div class="input-field">
+                        <select id="c2">
+                        </select>
+                        <label for="c2">Ville d'arrivée</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="text" value="#ff0000" id="colorpicker">
+                        <label for="colorpicker">Couleur du trait</label>
+                    </div>
+                    <button class="btn btn-large blue" onclick="compute_path()">Calculer</button>
                 </div>
             </div>
         </div>
@@ -53,28 +76,116 @@
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/materialize.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/colorpicker.min.js') }}"></script>
     <script>
         $(document).ready(function() {
             $('select').material_select();
+            $('#colorpicker').colorpicker();
+            get_cities();
         });
 
+        $('select').on('contentChanged', function() {
+            $(this).material_select();
+        });
+
+        var map;
+        var paths = [];
+
+        function push_result(c1, c2, color, algo, len) {
+            len = parseFloat(len).toFixed(2);
+            $('#results').append(
+                '<div><span class="color-block" style="background: ' + color + '"></span>'
+                + len + 'km ' + c1 + ' -> ' + c2 + ' (' + algo + ')' + '</div>'
+            );
+        }
+
+        function compute_path() {
+            var c1 = $('#c1').val();
+            var c2 = $('#c2').val();
+            var algo = $('#algo').val();
+            var color = $('#colorpicker').val();
+            $.get('/path/' + algo + '/' + c1 + '/' + c2, function (data) {
+                if (data.status === 'error') {
+                    Materialize.toast(data.message, 4000);
+                } else if (data.status === 'ok') {
+                    if (data.path === null) {
+                        Materialize.toast('Aucun chemin touvé', 4000);
+                        return;
+                    }
+                    var path_coordinates = [];
+                    for (var elem in data.path) {
+                        path_coordinates.push(data.path[elem]);
+                    }
+                    var map_path = new google.maps.Polyline({
+                        path: path_coordinates,
+                        geodesic: true,
+                        strokeColor: color,
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
+                    });
+                    map_path.setMap(map);
+                    paths.push(map_path);
+                    push_result(data.path[0].name,
+                        data.path[data.path.length - 1].name,
+                        color, data.algo, data.len
+                    );
+                }
+            });
+        }
+
+        function clear_map() {
+            $('#results').html('');
+            for (var path in paths) {
+                paths[path].setMap(null);
+            }
+            paths = [];
+        }
+
+        function refresh_lists(list) {
+            var c1 = $('#c1');
+            var c2 = $('#c2');
+            c1.empty();
+            c2.empty();
+            c1.html('');
+            c2.html('');
+            for (var elem in list) {
+                c1.append($('<option></option>').attr('value', list[elem].id).text(list[elem].name));
+                c2.append($('<option></option>').attr('value', list[elem].id).text(list[elem].name));
+            }
+            c1.trigger('contentChanged');
+            c2.trigger('contentChanged');
+        }
+
+        function get_cities() {
+            $.get('/cities', function (data) {
+                if (data.status === 'ok') {
+                    refresh_lists(data.list);
+                }
+            });
+        }
+
+        function parse() {
+            var btn = $('#parse-btn');
+            btn.text('Construction...');
+            btn.attr('disabled', 'disabled');
+            var pop = $('#pop').val();
+            var dist = $('#dist').val();
+            $.get('/parse/' + pop + '/' + dist, function (data) {
+                if (data.status === 'ok') {
+                    Materialize.toast('Construction terminée', 4000);
+                    refresh_lists(data.list);
+                }
+                btn.text('Construire');
+                btn.removeAttr('disabled');
+            });
+        }
+
         function initMap() {
-            var map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(document.getElementById('map'), {
                 center: {lat: 46, lng: 3},
-                zoom: 6,
+                zoom: 5,
                 mapTypeId: 'terrain'
             });
-
-            var flightPlanCoordinates = [];
-            var flightPath = new google.maps.Polyline({
-                path: flightPlanCoordinates,
-                geodesic: true,
-                strokeColor: '#FF0000',
-                strokeOpacity: 1.0,
-                strokeWeight: 2
-            });
-
-            flightPath.setMap(map);
         }
     </script>
     <script async defer

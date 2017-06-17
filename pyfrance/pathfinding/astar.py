@@ -39,6 +39,7 @@ class AStar:
         :param src_id: l'id de la source
         :param dst_id: l'id de la destination
         :return: le chemin, une liste d'ids de villes
+                 la longueur du chemin
         """
         tmp_cities = dict(self.cities)
         costs = {}
@@ -60,11 +61,11 @@ class AStar:
                         costs[city.id] = costs[city_id] + dist + h
                         fathers[city.id] = city_id
         if costs[dst_id] == float('inf'):
-            return None
+            return None, None
         path = [dst_id]
         while fathers[path[0]] is not None and fathers[path[0]] is not src_id:
             path.insert(0, fathers[path[0]])
-        return path
+        return path, costs[dst_id]
 
     def compute_path_priority_queue(self, src_id, dst_id):
         """
@@ -75,6 +76,7 @@ class AStar:
         :param src_id: l'id de la source
         :param dst_id: l'id de la destination
         :return: le chemin, une liste d'ids de villes
+                 la longueur du chemin
         """
         tmp_cities = dict(self.cities)
         costs = {}
@@ -101,9 +103,9 @@ class AStar:
                         heapq.heappush(costs_heap, (cost + dist + h, city.id))
                         fathers[city.id] = city_id
         if costs[dst_id] == float('inf'):
-            return None
+            return None, None
         path = [dst_id]
         while fathers[path[0]] is not None and fathers[path[0]] is not src_id:
             path.insert(0, fathers[path[0]])
         path.insert(0, src_id)
-        return path
+        return path, costs[dst_id]
