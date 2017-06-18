@@ -69,7 +69,7 @@
                         <input type="text" value="#ff0000" id="colorpicker">
                         <label for="colorpicker">Couleur du trait</label>
                     </div>
-                    <button class="btn btn-large blue" onclick="compute_path()">Calculer</button>
+                    <button id="comp-btn" class="btn btn-large blue" onclick="compute_path()">Calculer</button>
                 </div>
             </div>
         </div>
@@ -103,16 +103,21 @@
         }
 
         function compute_path() {
+            var btn = $('#comp-btn');
+            btn.text('Calcul...');
+            btn.attr('disabled', 'disabled');
             var c1 = $('#c1').val();
             var c2 = $('#c2').val();
             var algo = $('#algo').val();
             var color = $('#colorpicker').val();
-            $.get('/path/' + algo + '/' + c1 + '/' + c2, function (data) {
+            $.get('/path/' + algo + '/' + c1 + '/' + c2).done(function (data) {
                 if (data.status === 'error') {
                     Materialize.toast(data.message, 4000);
                 } else if (data.status === 'ok') {
                     if (data.path === null) {
                         Materialize.toast('Aucun chemin touvé', 4000);
+                        btn.text('Calculer');
+                        btn.removeAttr('disabled');
                         return;
                     }
                     var path_coordinates = [];
@@ -132,7 +137,13 @@
                         data.path[data.path.length - 1].name,
                         color, data.algo, data.len, data.time
                     );
+                    btn.text('Calculer');
+                    btn.removeAttr('disabled');
                 }
+            }).fail(function () {
+                Materialize.toast('Une erreur s\'est produite', 4000);
+                btn.text('Calculer');
+                btn.removeAttr('disabled');
             });
         }
 
@@ -160,10 +171,12 @@
         }
 
         function get_cities() {
-            $.get('/cities', function (data) {
+            $.get('/cities').done(function (data) {
                 if (data.status === 'ok') {
                     refresh_lists(data.list);
                 }
+            }).fail(function () {
+                Materialize.toast('Une erreur s\'est produite', 4000);
             });
         }
 
@@ -173,11 +186,15 @@
             btn.attr('disabled', 'disabled');
             var pop = $('#pop').val();
             var dist = $('#dist').val();
-            $.get('/parse/' + pop + '/' + dist, function (data) {
+            $.get('/parse/' + pop + '/' + dist).done(function (data) {
                 if (data.status === 'ok') {
                     Materialize.toast('Construction terminée', 4000);
                     refresh_lists(data.list);
                 }
+                btn.text('Construire');
+                btn.removeAttr('disabled');
+            }).fail(function () {
+                Materialize.toast('Une erreur s\'est produite', 4000);
                 btn.text('Construire');
                 btn.removeAttr('disabled');
             });

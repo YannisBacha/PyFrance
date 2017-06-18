@@ -25,7 +25,7 @@ def create_cities_list(cities):
 
 def js_path(cities, path):
     if path is None:
-        return None
+        return None, None
     json = []
     cost = 0
     i = 0
@@ -54,7 +54,7 @@ app.cities_list = None
 
 @app.route('/')
 def home():
-    return render_template('test.html')
+    return render_template('page.html')
 
 
 @app.route('/parse/<int:pop>/<int:dist>')
