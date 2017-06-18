@@ -26,13 +26,18 @@ def js_path(cities, path):
     if path is None:
         return None
     json = []
+    cost = 0
+    i = 0
     for city_id in path:
+        if i != 0:
+            cost += Builder.haversine(cities[path[i]], cities[path[i - 1]])
+        i += 1
         city = cities[city_id]
         json.append({'lat': city.coordinates.latitude,
                      'lng': city.coordinates.longitude,
                      'id': city.id,
                      'name': city.name})
-    return json
+    return json, cost
 
 
 def build_graph(cities, dist):
@@ -75,10 +80,9 @@ def dijkstra(c1, c2):
     if c1 not in app.cities or c2 not in app.cities:
         return jsonify({'status': 'error',
                         'message': 'Un identifiant n\'existe pas'})
-    dijkstra = Dijkstra(app.cities)
-    path, cost = dijkstra.compute_path(c1, c2)
+    path, cost = js_path(app.cities, Dijkstra(app.cities).compute_path(c1, c2))
     return jsonify({'status': 'ok',
-                    'path': js_path(app.cities, path),
+                    'path': path,
                     'len': cost,
                     'algo': 'Dijkstra'})
 
@@ -91,9 +95,8 @@ def astar(c1, c2):
     if c1 not in app.cities or c2 not in app.cities:
         return jsonify({'status': 'error',
                         'message': 'Un identifiant n\'existe pas'})
-    astar = AStar(app.cities)
-    path, cost = astar.compute_path(c1, c2)
+    path, cost = js_path(app.cities, AStar(app.cities).compute_path(c1, c2))
     return jsonify({'status': 'ok',
-                    'path': js_path(app.cities, path),
+                    'path': path,
                     'len': cost,
                     'algo': 'A*'})

@@ -25,32 +25,32 @@ class Dijkstra:
         :param src_id: l'id de la source
         :param dst_id: l'id de la destination
         :return: le chemin, une liste d'ids de villes
-                 la longueur du chemin
         """
-        tmp_cities = dict(self.cities)
+        fathers = {src_id: None}
+        cities_ids = set()
         costs = {}
-        fathers = {}
-        for city_id in tmp_cities:
+        for city_id in self.cities:
             costs[city_id] = float('inf')
-            fathers[city_id] = None
+            cities_ids.add(city_id)
         costs[src_id] = 0
-        while len(tmp_cities) > 0:
-            city_id = min(tmp_cities, key=lambda c_id: costs[c_id])
-            if city_id == dst_id:
+        while len(cities_ids) > 0:
+            current_id = min(cities_ids, key=lambda x: costs[x])
+            if current_id == dst_id:
                 break
-            c = self.cities[city_id]
-            del tmp_cities[city_id]
-            for city, dist in c.neighbours:
-                if city.id in tmp_cities:
-                    if costs[city.id] > costs[city_id] + dist:
-                        costs[city.id] = costs[city_id] + dist
-                        fathers[city.id] = city_id
+            cities_ids.remove(current_id)
+            for neighbour, dist in self.cities[current_id].neighbours:
+                if neighbour.id not in cities_ids:
+                    continue
+                tmp_score = costs[current_id] + dist
+                if tmp_score < costs[neighbour.id]:
+                    fathers[neighbour.id] = current_id
+                    costs[neighbour.id] = tmp_score
         if costs[dst_id] == float('inf'):
-            return None, None
+            return None
         path = [dst_id]
-        while fathers[path[0]] is not None and fathers[path[0]] is not src_id:
+        while fathers[path[0]] is not None:
             path.insert(0, fathers[path[0]])
-        return path, costs[dst_id]
+        return path
 
     def compute_path_priority_queue(self, src_id, dst_id):
         """
@@ -61,35 +61,34 @@ class Dijkstra:
         :param src_id: l'id de la source
         :param dst_id: l'id de la destination
         :return: le chemin, une liste d'ids de villes
-                 la longueur du chemin
         """
-        tmp_cities = dict(self.cities)
+        fathers = {src_id: None}
+        cities_ids = set()
         costs = {}
         costs_heap = []
-        fathers = {}
-        for city_id in tmp_cities:
+        for city_id in self.cities:
             costs[city_id] = float('inf')
-            fathers[city_id] = None
+            cities_ids.add(city_id)
         costs[src_id] = 0
         heapq.heappush(costs_heap, (0, src_id))
-        while len(tmp_cities) > 0 and len(costs_heap) > 0:
-            cost, city_id = heapq.heappop(costs_heap)
-            if city_id == dst_id:
-                break
-            c = self.cities[city_id]
-            if city_id not in tmp_cities:
+        while len(cities_ids) > 0:
+            current_id = heapq.heappop(costs_heap)[1]
+            if current_id not in cities_ids:
                 continue
-            del tmp_cities[city_id]
-            for city, dist in c.neighbours:
-                if city.id in tmp_cities:
-                    if costs[city.id] > cost + dist:
-                        costs[city.id] = cost + dist
-                        heapq.heappush(costs_heap, (cost + dist, city.id))
-                        fathers[city.id] = city_id
+            if current_id == dst_id:
+                break
+            cities_ids.remove(current_id)
+            for neighbour, dist in self.cities[current_id].neighbours:
+                if neighbour.id not in cities_ids:
+                    continue
+                tmp_score = costs[current_id] + dist
+                if tmp_score < costs[neighbour.id]:
+                    fathers[neighbour.id] = current_id
+                    costs[neighbour.id] = tmp_score
+                    heapq.heappush(costs_heap, (costs[neighbour.id] + dist, neighbour.id))
         if costs[dst_id] == float('inf'):
-            return None, None
+            return None
         path = [dst_id]
-        while fathers[path[0]] is not None and fathers[path[0]] is not src_id:
+        while fathers[path[0]] is not None:
             path.insert(0, fathers[path[0]])
-        path.insert(0, src_id)
-        return path, costs[dst_id]
+        return path

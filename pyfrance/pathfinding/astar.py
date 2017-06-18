@@ -33,79 +33,92 @@ class AStar:
 
     def compute_path(self, src_id, dst_id):
         """
-        Applique l'algorithme de Dijkstra.
+        Applique l'algorithme de A*.
         Le minimum est recherché linéairement selon le coût.
 
         :param src_id: l'id de la source
         :param dst_id: l'id de la destination
         :return: le chemin, une liste d'ids de villes
-                 la longueur du chemin
         """
-        tmp_cities = dict(self.cities)
+        dst = self.cities[dst_id]
+        fathers = {src_id: None}
+        open_c = set()
+        open_c.add(src_id)
+        closed_c = set()
         costs = {}
-        fathers = {}
-        for city_id in tmp_cities:
+        h_costs = {}
+        for city_id in self.cities:
             costs[city_id] = float('inf')
-            fathers[city_id] = None
-        costs[src_id] = AStar.heuristic(self.cities[src_id], self.cities[dst_id])
-        while len(tmp_cities) > 0:
-            city_id = min(tmp_cities, key=lambda c_id: costs[c_id])
-            if city_id == dst_id:
+            h_costs[city_id] = float('inf')
+        costs[src_id] = 0
+        h_costs[src_id] = AStar.heuristic(self.cities[src_id], dst)
+        while len(open_c) > 0:
+            current_id = min(open_c, key=lambda x: h_costs[x])
+            if current_id == dst_id:
                 break
-            c = self.cities[city_id]
-            del tmp_cities[city_id]
-            for city, dist in c.neighbours:
-                if city.id in tmp_cities:
-                    h = AStar.heuristic(self.cities[city.id], self.cities[dst_id])
-                    if costs[city.id] > costs[city_id] + dist + h:
-                        costs[city.id] = costs[city_id] + dist + h
-                        fathers[city.id] = city_id
+            open_c.remove(current_id)
+            closed_c.add(current_id)
+            for neighbour, dist in self.cities[current_id].neighbours:
+                if neighbour.id in closed_c:
+                    continue
+                if neighbour.id not in open_c:
+                    open_c.add(neighbour.id)
+                t_g_score = costs[current_id] + dist
+                if t_g_score >= costs[neighbour.id]:
+                    continue
+                fathers[neighbour.id] = current_id
+                costs[neighbour.id] = t_g_score
+                h_costs[neighbour.id] = costs[neighbour.id] + AStar.heuristic(neighbour, dst)
         if costs[dst_id] == float('inf'):
-            return None, None
+            return None
         path = [dst_id]
-        while fathers[path[0]] is not None and fathers[path[0]] is not src_id:
+        while fathers[path[0]] is not None:
             path.insert(0, fathers[path[0]])
-        return path, costs[dst_id]
+        return path
 
     def compute_path_priority_queue(self, src_id, dst_id):
         """
-        Applique l'algorithme de Dijkstra.
+        Applique l'algorithme de A*.
         Les coûts sont stockés dans un heapq. Le minimum est toujours placé devant.
         L'insertion et la suppression sont en O(log(n))
 
         :param src_id: l'id de la source
         :param dst_id: l'id de la destination
         :return: le chemin, une liste d'ids de villes
-                 la longueur du chemin
         """
-        tmp_cities = dict(self.cities)
+        dst = self.cities[dst_id]
+        fathers = {src_id: None}
+        open_c = set()
+        open_c.add(src_id)
+        closed_c = set()
         costs = {}
-        costs_heap = []
-        fathers = {}
-        for city_id in tmp_cities:
+        h_costs = []
+        for city_id in self.cities:
             costs[city_id] = float('inf')
-            fathers[city_id] = None
-        costs[src_id] = AStar.heuristic(self.cities[src_id], self.cities[dst_id])
-        heapq.heappush(costs_heap, (costs[src_id], src_id))
-        while len(tmp_cities) > 0 and len(costs_heap) > 0:
-            cost, city_id = heapq.heappop(costs_heap)
-            if city_id == dst_id:
-                break
-            c = self.cities[city_id]
-            if city_id not in tmp_cities:
+        costs[src_id] = 0
+        heapq.heappush(h_costs, (AStar.heuristic(self.cities[src_id], dst), src_id))
+        while len(open_c) > 0:
+            current_id = heapq.heappop(h_costs)[1]
+            if current_id in closed_c:
                 continue
-            del tmp_cities[city_id]
-            for city, dist in c.neighbours:
-                if city.id in tmp_cities:
-                    h = AStar.heuristic(self.cities[city.id], self.cities[dst_id])
-                    if costs[city.id] > cost + dist + h:
-                        costs[city.id] = cost + dist + h
-                        heapq.heappush(costs_heap, (cost + dist + h, city.id))
-                        fathers[city.id] = city_id
+            if current_id == dst_id:
+                break
+            open_c.remove(current_id)
+            closed_c.add(current_id)
+            for neighbour, dist in self.cities[current_id].neighbours:
+                if neighbour.id in closed_c:
+                    continue
+                if neighbour.id not in open_c:
+                    open_c.add(neighbour.id)
+                t_g_score = costs[current_id] + dist
+                if t_g_score >= costs[neighbour.id]:
+                    continue
+                fathers[neighbour.id] = current_id
+                costs[neighbour.id] = t_g_score
+                heapq.heappush(h_costs, (costs[neighbour.id] + AStar.heuristic(neighbour, dst), neighbour.id))
         if costs[dst_id] == float('inf'):
-            return None, None
+            return None
         path = [dst_id]
-        while fathers[path[0]] is not None and fathers[path[0]] is not src_id:
+        while fathers[path[0]] is not None:
             path.insert(0, fathers[path[0]])
-        path.insert(0, src_id)
-        return path, costs[dst_id]
+        return path
