@@ -1,5 +1,6 @@
 from flask import render_template, jsonify
 from flask import Flask
+from time import time
 
 from pyfrance.computing import Parser, Builder
 from pyfrance.pathfinding import Dijkstra, AStar
@@ -52,7 +53,7 @@ app.cities_list = None
 
 
 @app.route('/')
-def hello_world():
+def home():
     return render_template('test.html')
 
 
@@ -72,31 +73,41 @@ def get_cities():
     return jsonify({'status': 'ok', 'list': app.cities_list})
 
 
-@app.route('/path/dijkstra/<string:c1>/<string:c2>')
-def dijkstra(c1, c2):
+def algorithm(fn, name, c1, c2):
     if app.cities is None:
         return jsonify({'status': 'error',
                         'message': 'Le graphe n\'est pas construit'})
     if c1 not in app.cities or c2 not in app.cities:
         return jsonify({'status': 'error',
                         'message': 'Un identifiant n\'existe pas'})
-    path, cost = js_path(app.cities, Dijkstra(app.cities).compute_path(c1, c2))
+    t1 = time()
+    path, cost = js_path(app.cities, fn(c1, c2))
     return jsonify({'status': 'ok',
                     'path': path,
                     'len': cost,
-                    'algo': 'Dijkstra'})
+                    'algo': name,
+                    'time': time() - t1})
+
+
+@app.route('/path/dijkstra/<string:c1>/<string:c2>')
+def dijkstra(c1, c2):
+    return algorithm(Dijkstra(app.cities).compute_path,
+                     'Dijkstra', c1, c2)
+
+
+@app.route('/path/dijkstra2/<string:c1>/<string:c2>')
+def dijkstra2(c1, c2):
+    return algorithm(Dijkstra(app.cities).compute_path_priority_queue,
+                     'Dijkstra, priorité', c1, c2)
 
 
 @app.route('/path/astar/<string:c1>/<string:c2>')
 def astar(c1, c2):
-    if app.cities is None:
-        return jsonify({'status': 'error',
-                        'message': 'Le graphe n\'est pas construit'})
-    if c1 not in app.cities or c2 not in app.cities:
-        return jsonify({'status': 'error',
-                        'message': 'Un identifiant n\'existe pas'})
-    path, cost = js_path(app.cities, AStar(app.cities).compute_path(c1, c2))
-    return jsonify({'status': 'ok',
-                    'path': path,
-                    'len': cost,
-                    'algo': 'A*'})
+    return algorithm(AStar(app.cities).compute_path,
+                     'A*', c1, c2)
+
+
+@app.route('/path/astar2/<string:c1>/<string:c2>')
+def astar2(c1, c2):
+    return algorithm(AStar(app.cities).compute_path_priority_queue,
+                     'A*, priorité', c1, c2)

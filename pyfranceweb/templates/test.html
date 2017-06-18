@@ -49,7 +49,9 @@
                     <div class="input-field">
                         <select id="algo">
                             <option value="dijkstra">Dijkstra</option>
+                            <option value="dijkstra2">Dijkstra avec file de priorité</option>
                             <option value="astar">A*</option>
+                            <option value="astar2">A* avec file de priorité</option>
                         </select>
                         <label for="algo">Algorithme</label>
                     </div>
@@ -91,11 +93,12 @@
         var map;
         var paths = [];
 
-        function push_result(c1, c2, color, algo, len) {
+        function push_result(c1, c2, color, algo, len, time) {
             len = parseFloat(len).toFixed(2);
+            time = parseFloat(time).toFixed(2);
             $('#results').append(
                 '<div><span class="color-block" style="background: ' + color + '"></span>'
-                + len + 'km ' + c1 + ' -> ' + c2 + ' (' + algo + ')' + '</div>'
+                + len + 'km ' + c1 + ' -> ' + c2 + ' (' + algo + ' : ' + time + 'ms)' + '</div>'
             );
         }
 
@@ -127,7 +130,7 @@
                     paths.push(map_path);
                     push_result(data.path[0].name,
                         data.path[data.path.length - 1].name,
-                        color, data.algo, data.len
+                        color, data.algo, data.len, data.time
                     );
                 }
             });
