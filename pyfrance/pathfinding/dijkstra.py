@@ -73,8 +73,6 @@ class Dijkstra:
         heapq.heappush(costs_heap, (0, src_id))
         while len(cities_ids) > 0:
             current_id = heapq.heappop(costs_heap)[1]
-            """if current_id not in cities_ids:
-                continue"""
             if current_id == dst_id:
                 break
             cities_ids.remove(current_id)
