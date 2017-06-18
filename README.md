@@ -9,7 +9,7 @@ permet d'utiliser une interface claire et partique.
 ## Equipe ##
 * [Yannis Bacha](https://github.com/YannisBacha)
 * [Pierre Chat](https://github.com/TheCaptainCat)
-* [Omran Haidari]()
+* [Omran Haidari](https://github.com/omranhaidari)
 
 ## Algorithmes ##
 Deux algorithmes sont implémentés dans PyFrance : Dijkstra et A*.
