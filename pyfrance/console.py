@@ -66,8 +66,8 @@ class Console:
             elif c == 2:
                 path = algorithm(Dijkstra(p.cities).compute_path_priority_queue, c1, c2)
             elif c == 3:
-                path = algorithm(Dijkstra(p.cities).compute_path, c1, c2)
+                path = algorithm(AStar(p.cities).compute_path, c1, c2)
             elif c == 4:
-                path = algorithm(Dijkstra(p.cities).compute_path_priority_queue, c1, c2)
+                path = algorithm(AStar(p.cities).compute_path_priority_queue, c1, c2)
             print('Chemin calculé en {0}s'.format(time() - t1))
             print(path)
