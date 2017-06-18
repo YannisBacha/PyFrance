@@ -73,8 +73,8 @@ class Dijkstra:
         heapq.heappush(costs_heap, (0, src_id))
         while len(cities_ids) > 0:
             current_id = heapq.heappop(costs_heap)[1]
-            if current_id not in cities_ids:
-                continue
+            """if current_id not in cities_ids:
+                continue"""
             if current_id == dst_id:
                 break
             cities_ids.remove(current_id)
@@ -85,6 +85,7 @@ class Dijkstra:
                 if tmp_score < costs[neighbour.id]:
                     fathers[neighbour.id] = current_id
                     costs[neighbour.id] = tmp_score
+                    costs_heap = [x for x in costs_heap if x[1] != neighbour.id]
                     heapq.heappush(costs_heap, (costs[neighbour.id] + dist, neighbour.id))
         if costs[dst_id] == float('inf'):
             return None
